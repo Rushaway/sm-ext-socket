@@ -441,6 +441,12 @@ class ExtensionConfig(object):
 
   def AddCDetour(self, binary):
     sm_public_path = os.path.join(self.sm_root, 'public')
+    gameconfigs_header = os.path.join(sm_public_path, 'extensions', 'IGameConfigs.h')
+
+    if binary.compiler.like('msvc'):
+      binary.compiler.cflags += ['/FI' + gameconfigs_header]
+    else:
+      binary.compiler.cflags += ['-include', gameconfigs_header]
 
     if os.path.exists(os.path.join(sm_public_path, 'safetyhook')):
       binary.sources += [ os.path.join(sm_public_path, 'CDetour', 'detours.cpp') ]
