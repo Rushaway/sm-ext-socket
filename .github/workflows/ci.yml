@@ -20,7 +20,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04]
-        sourcemod-version: [1.11-dev]
+        sourcemod-version: [master]
         libboost-version: [boost-1.82.0]
         python-version: ['3.10']
         include:
