@@ -82,7 +82,9 @@ class ExtensionConfig(object):
     if builder.options.targets:
       target_archs = builder.options.targets.split(',')
     else:
-      target_archs = ['x86', 'x86_64']
+      target_archs = ['x86']
+      if builder.backend != 'amb2':
+        target_archs.append('x86_64')
 
     for arch in target_archs:
         try:
