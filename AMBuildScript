@@ -123,7 +123,7 @@ class ExtensionConfig(object):
     if builder.options.sm_path:
       self.sm_root = builder.options.sm_path
     else:
-      self.sm_root = ResolveEnvPath('SOURCEMOD112', 'sourcemod-1.12')
+      self.sm_root = ResolveEnvPath('SOURCEMOD113', 'sourcemod-1.13')
       if not self.sm_root:
         self.sm_root = ResolveEnvPath('SOURCEMOD', 'sourcemod')
       if not self.sm_root:
