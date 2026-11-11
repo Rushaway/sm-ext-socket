@@ -36,17 +36,17 @@ jobs:
           sudo apt install -yq --no-install-recommends g++-multilib ${{ matrix.compiler_cc }}
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           path: extension
 
       - name: Checkout SourceMod ${{ matrix.sourcemod-version }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: alliedmodders/sourcemod
           ref: ${{ matrix.sourcemod-version }}
@@ -80,8 +80,8 @@ jobs:
         working-directory: libboost
         run: |
           ./bootstrap.sh --prefix=build --with-libraries=thread,system
-          ./b2 -j8 cflags=-m32 cxxflags=-m32 address-model=32 threading=multi architecture=x86 instruction-set=i686 link=static runtime-link=static
-          ./b2 install
+          ./b2 -j8 cflags=-m32 cxxflags=-m32 address-model=32 threading=multi architecture=x86 instruction-set=i686 link=static runtime-link=static install
+          ./b2 -j8 --build-dir=bin64 --prefix=build64 cflags=-fPIC cxxflags=-fPIC address-model=64 threading=multi architecture=x86 link=static runtime-link=static install
 
       - name: Build
         working-directory: extension
@@ -90,11 +90,11 @@ jobs:
           BREAKPAD_SYMBOL_SERVER: ${{ secrets.BREAKPAD_SYMBOL_SERVER }}
         run: |
           mkdir build && cd build
-          python ../configure.py --enable-optimize --symbol-files
+          python ../configure.py --enable-optimize --symbol-files --targets=x86,x86_64
           ambuild
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ runner.os }}
           path: extension/build/package
@@ -107,7 +107,7 @@ jobs:
 
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
 
       - name: Package
         run: |
