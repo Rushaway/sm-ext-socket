@@ -41,13 +41,14 @@ jobs:
           tar -xzf boost.tar.gz && rm boost.tar.gz
           mv ${BOOST_VERSION} libboost
 
+      # Layout read by src/AMBuilder: dist/include/boost, dist/lib/<arch>.
       - name: Build Boost (Linux)
         if: runner.os == 'Linux'
         working-directory: libboost
         run: |
           ./bootstrap.sh --with-libraries=thread,system
-          ./b2 -j8 --stagedir=stage/x86 cflags=-m32 cxxflags=-m32 address-model=32 threading=multi architecture=x86 instruction-set=i686 link=static runtime-link=static stage
-          ./b2 -j8 --build-dir=bin64 --stagedir=stage/x86_64 cflags=-fPIC cxxflags=-fPIC address-model=64 threading=multi architecture=x86 link=static runtime-link=static stage
+          ./b2 -j8 --prefix="$PWD/dist" --libdir="$PWD/dist/lib/x86" cflags=-m32 cxxflags=-m32 address-model=32 threading=multi architecture=x86 instruction-set=i686 link=static runtime-link=static install
+          ./b2 -j8 --build-dir=bin64 --prefix="$PWD/dist" --libdir="$PWD/dist/lib/x86_64" cflags=-fPIC cxxflags=-fPIC address-model=64 threading=multi architecture=x86 link=static runtime-link=static install
 
       - name: Build Boost (Windows)
         if: runner.os == 'Windows'
@@ -55,19 +56,15 @@ jobs:
         shell: cmd
         run: |
           call bootstrap.bat || exit /b 1
-          b2 -j8 --with-thread --with-system --layout=system --stagedir=stage\x86 address-model=32 architecture=x86 threading=multi variant=release link=static runtime-link=static define=BOOST_TYPE_INDEX_FORCE_NO_RTTI_COMPATIBILITY stage || exit /b 1
-          b2 -j8 --with-thread --with-system --layout=system --stagedir=stage\x86_64 address-model=64 architecture=x86 threading=multi variant=release link=static runtime-link=static define=BOOST_TYPE_INDEX_FORCE_NO_RTTI_COMPATIBILITY stage || exit /b 1
+          b2 -j8 --with-thread --with-system --layout=system --prefix=%CD%\dist --libdir=%CD%\dist\lib\x86 address-model=32 architecture=x86 threading=multi variant=release link=static runtime-link=static define=BOOST_TYPE_INDEX_FORCE_NO_RTTI_COMPATIBILITY install || exit /b 1
+          b2 -j8 --with-thread --with-system --layout=system --prefix=%CD%\dist --libdir=%CD%\dist\lib\x86_64 address-model=64 architecture=x86 threading=multi variant=release link=static runtime-link=static define=BOOST_TYPE_INDEX_FORCE_NO_RTTI_COMPATIBILITY install || exit /b 1
 
-      # Layout read by src/AMBuilder: include/boost, lib/<arch>.
-      - name: Collect Boost
+      - name: Check Boost
         shell: bash
-        working-directory: libboost
+        working-directory: libboost/dist
         run: |
-          mkdir -p dist/include dist/lib
-          mv boost dist/include/boost
-          mv stage/x86/lib dist/lib/x86
-          mv stage/x86_64/lib dist/lib/x86_64
-          ls -l dist/lib/*
+          test -f include/boost/asio.hpp
+          ls -l lib/x86 lib/x86_64
 
       - name: Upload Boost
         uses: actions/upload-artifact@v7
